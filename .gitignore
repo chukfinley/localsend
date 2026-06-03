@@ -10,3 +10,6 @@
 
 # FVM Version Cache
 .fvm/
+
+# stray session dumps
+session.txt

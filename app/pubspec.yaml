@@ -17,7 +17,7 @@ dependencies:
     path: ../common
   connectivity_plus: 6.1.0
   convert: 3.1.2
-  dart_mappable: 4.6.0
+  dart_mappable: ^4.6.0
   desktop_drop: 0.5.0
   device_apps: 2.2.0
   device_info_plus: 11.1.1
@@ -82,15 +82,17 @@ dependencies:
   yaru: 8.3.0
 
 dev_dependencies:
-  build_runner: 2.7.1
-  dart_mappable_builder: 4.6.0
-  flutter_gen_runner: 5.12.0
-  flutter_lints: 5.0.0
-  freezed: 3.2.3
-  mockito: 5.5.0
+  build_runner: ^2.7.1
+  dart_mappable_builder: ^4.6.0
+  flutter_gen_runner: ^5.12.0
+  flutter_lints: ^5.0.0
+  freezed: ^3.2.3
+  mockito: ">=5.6.1 <5.6.3" # newer mockito needs analyzer ^13, which conflicts with the meta version pinned by the Flutter SDK
   refena_inspector: 2.1.0
-  slang_build_runner: 4.9.0
-  test: ^1.26.2
+  slang_build_runner: ^4.9.0
+  # NOTE: `test` removed as a direct dependency — it conflicts with the matcher /
+  # test_api versions pinned by flutter_test in the Flutter SDK. Test files use
+  # `package:flutter_test` instead, which re-exports the test framework.
 
 dependency_overrides:
   device_apps:
