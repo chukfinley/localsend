@@ -24,13 +24,29 @@ class StartSmartScan extends AsyncGlobalAction {
     unawaited(ref.redux(nearbyDevicesProvider).dispatchAsync(StartFavoriteScan(devices: favorites, https: https)));
 
     // Discover LocalSend instances among the Tailscale tailnet peers.
-    final tailscaleStatus = await ref.read(tailscaleProvider).getStatus();
-    if (tailscaleStatus.active) {
+    final port = ref.read(settingsProvider).port;
+    final tailscale = ref.read(tailscaleProvider);
+    final localStatus = await tailscale.getStatus();
+    if (localStatus.active) {
+      // Desktop: we have CLI access to the full tailnet.
       unawaited(ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
-        nodes: tailscaleStatus.onlinePeers,
-        port: ref.read(settingsProvider).port,
+        nodes: localStatus.onlinePeers,
+        port: port,
         https: https,
       )));
+    } else {
+      // No CLI access (mobile): ask a favorite "oracle" peer for its tailnet map.
+      for (final favorite in favorites) {
+        final remote = await tailscale.fetchFromPeer(ip: favorite.ip, port: favorite.port, https: https);
+        if (remote.onlinePeers.isNotEmpty) {
+          unawaited(ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
+            nodes: remote.onlinePeers,
+            port: port,
+            https: https,
+          )));
+          break;
+        }
+      }
     }
   }
 }

@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:common/api_route_builder.dart';
+import 'package:common/constants.dart';
 import 'package:logging/logging.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
@@ -91,6 +93,59 @@ class TailscaleService {
       _logger.warning('Failed to parse tailscale status: $e');
       return TailscaleStatus.inactive;
     }
+  }
+
+  /// Fetches another device's tailnet view from its `/tailscale` endpoint.
+  ///
+  /// This is how a device without CLI access (mobile) learns the tailnet: it
+  /// asks a desktop "oracle" peer for its peer map. Returns [TailscaleStatus.inactive]
+  /// on any failure.
+  Future<TailscaleStatus> fetchFromPeer({
+    required String ip,
+    required int port,
+    required bool https,
+  }) async {
+    HttpClient? client;
+    try {
+      final url = ApiRoute.tailscale.targetRaw(ip, port, https, peerProtocolVersion);
+      client = HttpClient()..badCertificateCallback = (_, __, ___) => true;
+      final request = await client.getUrl(Uri.parse(url)).timeout(const Duration(seconds: 4));
+      final response = await request.close().timeout(const Duration(seconds: 4));
+      if (response.statusCode != 200) {
+        return TailscaleStatus.inactive;
+      }
+      final body = await response.transform(utf8.decoder).join();
+      final json = jsonDecode(body) as Map<String, dynamic>;
+      final self = _parseFlatNode(json['self']);
+      final peers = ((json['peers'] as List?) ?? const [])
+          .map(_parseFlatNode)
+          .whereType<TailscaleNode>()
+          .toList();
+      return TailscaleStatus(self: self, peers: peers);
+    } catch (e) {
+      _logger.info('Failed to fetch tailscale map from $ip:$port: $e');
+      return TailscaleStatus.inactive;
+    } finally {
+      client?.close();
+    }
+  }
+
+  /// Parses a node from the flat JSON shape returned by the `/tailscale` endpoint
+  /// (`{ip, dnsName, hostName, online}`), as opposed to the raw `tailscale status` shape.
+  TailscaleNode? _parseFlatNode(Object? raw) {
+    if (raw is! Map) {
+      return null;
+    }
+    final ip = raw['ip'] as String? ?? '';
+    if (ip.isEmpty) {
+      return null;
+    }
+    return TailscaleNode(
+      ip: ip,
+      dnsName: raw['dnsName'] as String? ?? '',
+      hostName: raw['hostName'] as String? ?? '',
+      online: raw['online'] as bool? ?? false,
+    );
   }
 
   /// Reverse path: try every known binary location until one answers.

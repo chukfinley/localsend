@@ -12,6 +12,10 @@ enum ApiRoute {
   show('show'),
   prepareDownload('prepare-download'),
   download('download'),
+
+  /// Returns this device's view of the Tailscale tailnet (its peer map).
+  /// Lets devices without CLI access (mobile) learn the tailnet from a desktop.
+  tailscale('tailscale'),
   ;
 
   const ApiRoute(String path, [String? legacy])

@@ -33,6 +33,7 @@ import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/controller/common.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/network/server/server_utils.dart';
+import 'package:localsend_app/provider/network/tailscale_provider.dart';
 import 'package:localsend_app/provider/progress_provider.dart';
 import 'package:localsend_app/provider/receive_history_provider.dart';
 import 'package:localsend_app/provider/selection/selected_receiving_files_provider.dart';
@@ -77,6 +78,12 @@ class ReceiveController {
 
     router.get(ApiRoute.info.v2, (HttpRequest request) async {
       return await _infoHandler(request: request, alias: alias, fingerprint: fingerprint);
+    });
+
+    // Tailscale oracle: share this device's view of the tailnet so peers
+    // without CLI access (mobile) can discover the tailnet from a desktop.
+    router.get(ApiRoute.tailscale.v2, (HttpRequest request) async {
+      return await _tailscaleHandler(request);
     });
 
     // An upgraded version of /info
@@ -144,6 +151,22 @@ class ReceiveController {
     );
 
     return await request.respondJson(200, body: dto.toJson());
+  }
+
+  /// Returns this device's view of the Tailscale tailnet. On desktop this is the
+  /// full online peer map (from `tailscale status`); on mobile it is empty.
+  Future<void> _tailscaleHandler(HttpRequest request) async {
+    final status = await server.ref.read(tailscaleProvider).getStatus();
+    Map<String, dynamic> nodeToJson(TailscaleNode n) => {
+          'ip': n.ip,
+          'dnsName': n.dnsName,
+          'hostName': n.hostName,
+          'online': n.online,
+        };
+    return await request.respondJson(200, body: {
+      'self': status.self == null ? null : nodeToJson(status.self!),
+      'peers': status.onlinePeers.map(nodeToJson).toList(),
+    });
   }
 
   Future<void> _registerHandler({
