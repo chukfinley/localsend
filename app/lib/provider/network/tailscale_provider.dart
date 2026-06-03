@@ -130,6 +130,12 @@ class TailscaleService {
     if (raw is! Map<String, dynamic>) {
       return null;
     }
+    // Skip exit nodes (e.g. Mullvad infrastructure) — they are never LocalSend
+    // devices and would massively inflate the probe set.
+    if (raw['ExitNodeOption'] == true) {
+      return null;
+    }
+
     final ips = (raw['TailscaleIPs'] as List?)?.cast<String>() ?? const [];
     final ip = ips.firstWhere(_isTailscaleIpv4, orElse: () => '');
     if (ip.isEmpty) {
