@@ -1,6 +1,6 @@
 import 'package:common/model/device.dart';
 import 'package:common/model/dto/file_dto.dart';
-import 'package:common/model/dto/multicast_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:localsend_app/rust/api/model.dart' as rust_model;
 import 'package:mime/mime.dart';
 

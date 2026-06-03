@@ -1,5 +1,5 @@
 import 'package:common/model/device_info_result.dart';
-import 'package:common/model/dto/multicast_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:common/model/stored_security_context.dart';
 import 'package:common/src/isolate/child/sync_provider.dart';
 import 'package:common/src/isolate/dto/send_to_isolate_data.dart';

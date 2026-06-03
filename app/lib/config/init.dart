@@ -6,7 +6,7 @@ import 'package:common/api_route_builder.dart';
 import 'package:common/constants.dart';
 import 'package:common/isolate.dart';
 import 'package:common/model/dto/file_dto.dart';
-import 'package:common/model/dto/multicast_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:common/util/logger.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 import 'package:flutter/foundation.dart';

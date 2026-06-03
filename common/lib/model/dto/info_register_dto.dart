@@ -1,6 +1,6 @@
 import 'package:common/constants.dart';
 import 'package:common/model/device.dart';
-import 'package:common/model/dto/multicast_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:dart_mappable/dart_mappable.dart';
 
 part 'info_register_dto.mapper.dart';

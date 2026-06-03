@@ -1,5 +1,5 @@
 import 'package:common/model/device_info_result.dart';
-import 'package:common/model/dto/multicast_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:common/model/stored_security_context.dart';
 import 'package:common/src/isolate/child/http_provider.dart';
 import 'package:dart_mappable/dart_mappable.dart';

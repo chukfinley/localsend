@@ -8,6 +8,7 @@ import 'package:common/isolate.dart';
 import 'package:common/model/device.dart';
 import 'package:common/model/dto/multicast_dto.dart';
 import 'package:common/model/dto/register_dto.dart';
+import 'package:common/model/protocol_type.dart';
 import 'package:common/src/isolate/child/http_provider.dart';
 import 'package:common/util/network_interfaces.dart';
 import 'package:common/util/sleep.dart';
