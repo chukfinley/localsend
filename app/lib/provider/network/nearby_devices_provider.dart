@@ -7,6 +7,7 @@ import 'package:localsend_app/model/persistence/favorite_device.dart';
 import 'package:localsend_app/model/state/nearby_devices_state.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/logging/discovery_logs_provider.dart';
+import 'package:localsend_app/provider/network/tailscale_provider.dart';
 import 'package:refena_flutter/refena_flutter.dart';
 
 /// This provider is responsible for:
@@ -218,6 +219,105 @@ class StartFavoriteScan extends AsyncReduxAction<NearbyDevicesService, NearbyDev
     return state.copyWith(
       runningFavoriteScan: false,
     );
+  }
+}
+
+/// Discovers LocalSend instances among the Tailscale tailnet peers.
+///
+/// Every online peer is probed over its Tailscale IP. Peers that answer are
+/// registered as nearby devices and additionally saved as favorites, keyed by
+/// their stable fingerprint, with both the MagicDNS name and the Tailscale IP
+/// recorded as known addresses. This realizes device-based discovery: open the
+/// app and every tailnet device running LocalSend shows up automatically.
+class StartTailscaleScan extends AsyncReduxAction<NearbyDevicesService, NearbyDevicesState> {
+  final List<TailscaleNode> nodes;
+  final int port;
+  final bool https;
+
+  StartTailscaleScan({
+    required this.nodes,
+    required this.port,
+    required this.https,
+  });
+
+  @override
+  Future<NearbyDevicesState> reduce() async {
+    if (nodes.isEmpty) {
+      return state;
+    }
+
+    final nodeByIp = {for (final n in nodes) n.ip: n};
+
+    final stream = external(notifier._isolateController).dispatchTakeResult(
+      IsolateFavoriteHttpDiscoveryAction(
+        favorites: nodes.map((n) => (n.ip, port)).toList(),
+        https: https,
+      ),
+    );
+
+    await for (final device in stream) {
+      final node = nodeByIp[device.ip];
+      notifier._discoveryLogger.addLog('[DISCOVER/TS] ${node?.dnsName ?? device.alias} (${device.ip})');
+      await dispatchAsync(RegisterDeviceAction(device));
+      if (node != null) {
+        await dispatchAsync(_UpsertTailscaleFavoriteAction(device: device, node: node));
+      }
+    }
+
+    return state;
+  }
+}
+
+/// Creates or updates the favorite for a Tailscale-discovered device, making
+/// sure its MagicDNS name and Tailscale IP are both stored as known addresses.
+class _UpsertTailscaleFavoriteAction extends AsyncReduxAction<NearbyDevicesService, NearbyDevicesState> {
+  final Device device;
+  final TailscaleNode node;
+
+  _UpsertTailscaleFavoriteAction({required this.device, required this.node});
+
+  @override
+  bool get trackOrigin => false;
+
+  @override
+  Future<NearbyDevicesState> reduce() async {
+    final existing = notifier._favoriteService.state.firstWhereOrNull((e) => e.fingerprint == device.fingerprint);
+
+    if (existing == null) {
+      await external(notifier._favoriteService).dispatchAsync(
+        AddFavoriteAction(
+          FavoriteDevice.fromValues(
+            fingerprint: device.fingerprint,
+            ip: node.dnsName.isNotEmpty ? node.dnsName : device.ip!,
+            port: device.port,
+            alias: node.hostName.isNotEmpty ? node.hostName : device.alias,
+            addresses: [
+              if (node.dnsName.isNotEmpty) device.ip!,
+            ],
+          ),
+        ),
+      );
+      return state;
+    }
+
+    // Merge the MagicDNS name and Tailscale IP into the known addresses.
+    final known = existing.allAddresses.toSet();
+    final merged = {
+      ...known,
+      if (node.dnsName.isNotEmpty) node.dnsName,
+      if (device.ip != null) device.ip!,
+    };
+    if (merged.length != known.length) {
+      final all = merged.toList();
+      await external(notifier._favoriteService).dispatchAsync(
+        UpdateFavoriteAction(existing.copyWith(
+          ip: all.first,
+          addresses: all.skip(1).toList(),
+        )),
+      );
+    }
+
+    return state;
   }
 }
 
