@@ -8,18 +8,6 @@ import 'package:meta/meta.dart';
 
 sealed class HttpScanTask {}
 
-class HttpInterfaceScanTask implements HttpScanTask {
-  final String networkInterface;
-  final int port;
-  final bool https;
-
-  HttpInterfaceScanTask({
-    required this.networkInterface,
-    required this.port,
-    required this.https,
-  });
-}
-
 class HttpFavoriteScanTask implements HttpScanTask {
   final List<(String, int)> favorites;
   final bool https;
@@ -43,11 +31,6 @@ Future<void> setupHttpScanDiscoveryIsolate(
     initialData: initialData,
     handler: (ref, task) async {
       final stream = switch (task.data) {
-        HttpInterfaceScanTask data => ref.read(httpScanDiscoveryProvider).getStream(
-              networkInterface: data.networkInterface,
-              port: data.port,
-              https: data.https,
-            ),
         HttpFavoriteScanTask data => ref.read(httpScanDiscoveryProvider).getFavoriteStream(
               devices: data.favorites,
               https: data.https,

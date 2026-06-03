@@ -12,28 +12,12 @@ final httpScanDiscoveryProvider = ViewProvider((ref) {
   );
 });
 
-Map<String, TaskRunner> _runners = {};
-
 class HttpScanDiscoveryService {
   final StateAccessor<HttpTargetDiscoveryService> _targetedDiscoveryService;
 
   HttpScanDiscoveryService({
     required StateAccessor<HttpTargetDiscoveryService> targetedDiscoveryService,
   }) : _targetedDiscoveryService = targetedDiscoveryService;
-
-  Stream<Device> getStream({required String networkInterface, required int port, required bool https}) {
-    final ipList = List.generate(256, (i) => '${networkInterface.split('.').take(3).join('.')}.$i').where((ip) => ip != networkInterface).toList();
-    _runners[networkInterface]?.stop();
-    _runners[networkInterface] = TaskRunner<Device?>(
-      initialTasks: List.generate(
-        ipList.length,
-        (index) => () async => _doRequest(ipList[index], port, https),
-      ),
-      concurrency: 50,
-    );
-
-    return _runners[networkInterface]!.stream.where((device) => device != null).cast<Device>();
-  }
 
   Stream<Device> getFavoriteStream({required List<(String, int)> devices, required bool https}) {
     final runner = TaskRunner<Device?>(

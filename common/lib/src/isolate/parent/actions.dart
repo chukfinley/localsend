@@ -13,40 +13,6 @@ import 'package:refena/refena.dart';
 
 final _idProvider = IdProvider();
 
-class IsolateInterfaceHttpDiscoveryAction extends ReduxActionWithResult<IsolateController, ParentIsolateState, Stream<Device>> {
-  final String networkInterface;
-  final int port;
-  final bool https;
-
-  IsolateInterfaceHttpDiscoveryAction({
-    required this.networkInterface,
-    required this.port,
-    required this.https,
-  });
-
-  @override
-  (ParentIsolateState, Stream<Device>) reduce() {
-    final connection = state.httpScanDiscovery;
-    if (connection == null) {
-      throw StateError('httpScanDiscovery is not initialized');
-    }
-
-    final task = HttpInterfaceScanTask(
-      networkInterface: networkInterface,
-      port: port,
-      https: https,
-    );
-
-    return (
-      state,
-      _sendTaskAndListenStream(
-        task: task,
-        connection: connection,
-      )
-    );
-  }
-}
-
 class IsolateFavoriteHttpDiscoveryAction extends ReduxActionWithResult<IsolateController, ParentIsolateState, Stream<Device>> {
   final List<(String, int)> favorites;
   final bool https;
