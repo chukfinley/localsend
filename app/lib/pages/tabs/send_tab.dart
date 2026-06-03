@@ -3,7 +3,6 @@ import 'package:collection/collection.dart';
 import 'package:common/model/device.dart';
 import 'package:common/model/session_status.dart';
 import 'package:flutter/material.dart';
-import 'package:localsend_app/config/theme.dart';
 import 'package:localsend_app/gen/strings.g.dart';
 import 'package:localsend_app/model/send_mode.dart';
 import 'package:localsend_app/pages/selected_files_page.dart';
@@ -179,9 +178,7 @@ class SendTab extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    _ScanButton(
-                      ips: vm.localIps,
-                    ),
+                    const _ScanButton(),
                     Tooltip(
                       message: t.sendTab.manualSending,
                       child: CustomIconButton(
@@ -323,91 +320,31 @@ class _CircularPopupButton<T> extends StatelessWidget {
   }
 }
 
-/// The scan button that uses [_CircularPopupButton].
+/// Refresh button that re-runs Tailscale discovery.
 class _ScanButton extends StatelessWidget {
-  final List<String> ips;
-
-  const _ScanButton({
-    required this.ips,
-  });
+  const _ScanButton();
 
   @override
   Widget build(BuildContext context) {
-    final (scanningFavorites, scanningIps) = context.ref.watch(nearbyDevicesProvider.select((s) => (s.runningFavoriteScan, s.runningIps)));
+    final scanningFavorites = context.ref.watch(nearbyDevicesProvider.select((s) => s.runningFavoriteScan));
     final animations = context.ref.watch(animationProvider);
 
-    final spinning = (scanningFavorites || scanningIps.isNotEmpty) && animations;
-    final iconColor = !animations && scanningIps.isNotEmpty ? Theme.of(context).colorScheme.warning : null;
+    final spinning = scanningFavorites && animations;
 
-    if (ips.length <= StartSmartScan.maxInterfaces) {
-      return Tooltip(
-        message: t.sendTab.scan,
-        child: RotatingWidget(
-          duration: const Duration(seconds: 2),
-          spinning: spinning,
-          reverse: true,
-          child: CustomIconButton(
-            onPressed: () async {
-              context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
-              await context.global.dispatchAsync(StartSmartScan(forceLegacy: true));
-            },
-            child: Icon(Icons.sync, color: iconColor),
-          ),
-        ),
-      );
-    }
-
-    return _CircularPopupButton(
-      tooltip: t.sendTab.scan,
-      onSelected: (ip) async {
-        context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
-        await context.global.dispatchAsync(StartLegacySubnetScan(subnets: [ip]));
-      },
-      itemBuilder: (_) {
-        return [
-          ...ips.map(
-            (ip) => PopupMenuItem(
-              value: ip,
-              padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _RotatingSyncIcon(ip),
-                  const SizedBox(width: 10),
-                  Text(ip),
-                ],
-              ),
-            ),
-          ),
-        ];
-      },
+    return Tooltip(
+      message: t.sendTab.scan,
       child: RotatingWidget(
         duration: const Duration(seconds: 2),
         spinning: spinning,
         reverse: true,
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Icon(Icons.sync, color: iconColor),
+        child: CustomIconButton(
+          onPressed: () async {
+            context.redux(nearbyDevicesProvider).dispatch(ClearFoundDevicesAction());
+            await context.global.dispatchAsync(StartSmartScan());
+          },
+          child: const Icon(Icons.sync),
         ),
       ),
-    );
-  }
-}
-
-/// A separate widget, so it gets the latest data from provider.
-class _RotatingSyncIcon extends StatelessWidget {
-  final String ip;
-
-  const _RotatingSyncIcon(this.ip);
-
-  @override
-  Widget build(BuildContext context) {
-    final scanningIps = context.ref.watch(nearbyDevicesProvider.select((s) => s.runningIps));
-    return RotatingWidget(
-      duration: const Duration(seconds: 2),
-      spinning: scanningIps.contains(ip),
-      reverse: true,
-      child: const Icon(Icons.sync),
     );
   }
 }

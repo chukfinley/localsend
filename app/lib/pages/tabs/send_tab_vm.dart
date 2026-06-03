@@ -203,7 +203,7 @@ class SendTabInitAction extends AsyncGlobalAction {
   Future<void> reduce() async {
     final devices = ref.read(nearbyDevicesProvider).devices;
     if (devices.isEmpty) {
-      await dispatchAsync(StartSmartScan(forceLegacy: false));
+      await dispatchAsync(StartSmartScan());
     }
   }
 }
