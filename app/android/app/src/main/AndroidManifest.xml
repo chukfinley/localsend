@@ -15,6 +15,11 @@
 
     <uses-permission android:name="android.permission.BIND_QUICK_SETTINGS_TILE" tools:targetApi="24" />
 
+    <!-- Foreground service so the receiver keeps running in the background -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Android TV -->
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -80,6 +85,12 @@
                 <action android:name="android.service.quicksettings.action.QS_TILE"/>
             </intent-filter>
         </service>
+
+        <!-- Foreground service that keeps the receiver alive in the background -->
+        <service
+            android:name=".ReceiveForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

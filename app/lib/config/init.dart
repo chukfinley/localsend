@@ -37,6 +37,7 @@ import 'package:localsend_app/rust/frb_generated.dart';
 import 'package:localsend_app/util/i18n.dart';
 import 'package:localsend_app/util/native/autostart_helper.dart';
 import 'package:localsend_app/util/native/cache_helper.dart';
+import 'package:localsend_app/util/native/channel/android_channel.dart';
 import 'package:localsend_app/util/native/content_uri_helper.dart';
 import 'package:localsend_app/util/native/context_menu_helper.dart';
 import 'package:localsend_app/util/native/cross_file_converters.dart';
@@ -212,6 +213,12 @@ Future<void> postInit(BuildContext context, Ref ref, bool appStart) async {
 
   try {
     await ref.notifier(serverProvider).startServerFromSettings();
+
+    // Android: keep the receiver alive in the background via a foreground service
+    // so files can be received without the app being open.
+    if (Platform.isAndroid) {
+      await startForegroundServiceAndroid();
+    }
   } catch (e) {
     if (context.mounted) {
       context.showSnackBar(e.toString());

@@ -72,6 +72,16 @@ class MainActivity : FlutterActivity() {
                     result.success(isAnimationsEnabled())
                 }
 
+                "startForegroundService" -> {
+                    ReceiveForegroundService.start(applicationContext)
+                    result.success(null)
+                }
+
+                "stopForegroundService" -> {
+                    ReceiveForegroundService.stop(applicationContext)
+                    result.success(null)
+                }
+
                 else -> result.notImplemented()
             }
         }

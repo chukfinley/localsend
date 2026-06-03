@@ -92,6 +92,25 @@ Future<void> openGallery() async {
   await _methodChannel.invokeMethod('openGallery');
 }
 
+/// Starts a foreground service so the receiver keeps running (and the HTTP
+/// server socket stays bound) while the app is in the background.
+Future<void> startForegroundServiceAndroid() async {
+  try {
+    await _methodChannel.invokeMethod('startForegroundService');
+  } catch (e) {
+    _logger.warning('Failed to start foreground service', e);
+  }
+}
+
+/// Stops the receiver foreground service.
+Future<void> stopForegroundServiceAndroid() async {
+  try {
+    await _methodChannel.invokeMethod('stopForegroundService');
+  } catch (e) {
+    _logger.warning('Failed to stop foreground service', e);
+  }
+}
+
 @MappableClass()
 class PickDirectoryResult with PickDirectoryResultMappable {
   final String directoryUri;
