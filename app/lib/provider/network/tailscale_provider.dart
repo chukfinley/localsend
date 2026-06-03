@@ -49,6 +49,13 @@ class TailscaleStatus {
 
 final tailscaleProvider = Provider((ref) => TailscaleService());
 
+/// This device's own Tailscale MagicDNS name (e.g. `thinkpad.tailnet.ts.net`),
+/// or null if Tailscale is not active / not reachable. Cached after first read.
+final ownTailscaleNameProvider = FutureProvider<String?>((ref) async {
+  final status = await ref.read(tailscaleProvider).getStatus();
+  return status.self?.dnsName;
+});
+
 /// Reads the local Tailscale state via the `tailscale status --json` CLI.
 ///
 /// This only works on desktop platforms where the CLI is reachable. On mobile

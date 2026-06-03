@@ -6,6 +6,7 @@ import 'package:localsend_app/pages/home_page_controller.dart';
 import 'package:localsend_app/pages/receive_history_page.dart';
 import 'package:localsend_app/pages/tabs/receive_tab_vm.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
+import 'package:localsend_app/provider/network/tailscale_provider.dart';
 import 'package:localsend_app/util/ip_helper.dart';
 import 'package:localsend_app/util/native/platform_check.dart';
 import 'package:localsend_app/widget/animations/initial_fade_transition.dart';
@@ -198,6 +199,7 @@ class _InfoBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tailscaleName = context.watch(ownTailscaleNameProvider).data;
     return AnimatedCrossFade(
       crossFadeState: vm.showAdvanced ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 200),
@@ -246,6 +248,14 @@ class _InfoBox extends StatelessWidget {
                       SelectableText(vm.serverState?.port.toString() ?? '-'),
                     ],
                   ),
+                  if (tailscaleName != null && tailscaleName.isNotEmpty)
+                    TableRow(
+                      children: [
+                        const Text('Tailscale'),
+                        const SizedBox(width: 10),
+                        SelectableText(tailscaleName),
+                      ],
+                    ),
                 ],
               ),
             ),
