@@ -20,7 +20,6 @@ import 'package:localsend_app/pages/home_page_controller.dart';
 import 'package:localsend_app/provider/animation_provider.dart';
 import 'package:localsend_app/provider/app_arguments_provider.dart';
 import 'package:localsend_app/provider/device_info_provider.dart';
-import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
 import 'package:localsend_app/provider/network/webrtc/signaling_provider.dart';
 import 'package:localsend_app/provider/persistence_provider.dart';
@@ -219,11 +218,8 @@ Future<void> postInit(BuildContext context, Ref ref, bool appStart) async {
     }
   }
 
-  try {
-    ref.redux(nearbyDevicesProvider).dispatchAsync(StartMulticastListener()); // ignore: unawaited_futures
-  } catch (e) {
-    _logger.warning('Starting multicast listener failed', e);
-  }
+  // Tailscale-only: no multicast listener. Devices are discovered by probing
+  // the tailnet, and this device is found because its HTTP server answers /info.
 
   ref.redux(signalingProvider).dispatch(SetupSignalingConnection());
 
