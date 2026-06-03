@@ -56,7 +56,7 @@ class DeviceListTile extends StatelessWidget {
               DeviceBadge(
                 backgroundColor: badgeColor,
                 foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-                label: 'LAN • HTTP',
+                label: _isTailscaleIp(device.ip!) ? 'Tailscale' : 'LAN • HTTP',
               )
             else
               DeviceBadge(
@@ -76,4 +76,13 @@ class DeviceListTile extends StatelessWidget {
       onTap: onTap,
     );
   }
+}
+
+/// True if [ip] is in the Tailscale CGNAT range (100.64.0.0/10).
+bool _isTailscaleIp(String ip) {
+  final parts = ip.split('.');
+  if (parts.length != 4) return false;
+  final a = int.tryParse(parts[0]);
+  final b = int.tryParse(parts[1]);
+  return a == 100 && b != null && b >= 64 && b <= 127;
 }

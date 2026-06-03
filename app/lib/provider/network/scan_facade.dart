@@ -4,7 +4,10 @@ import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/provider/network/tailscale_provider.dart';
 import 'package:localsend_app/provider/settings_provider.dart';
+import 'package:logging/logging.dart';
 import 'package:refena_flutter/refena_flutter.dart';
+
+final _logger = Logger('SmartScan');
 
 /// Pure Tailscale discovery.
 ///
@@ -27,7 +30,9 @@ class StartSmartScan extends AsyncGlobalAction {
     final port = ref.read(settingsProvider).port;
     final tailscale = ref.read(tailscaleProvider);
     final localStatus = await tailscale.getStatus();
+    _logger.info('[TS-DEBUG] getStatus active=${localStatus.active} self=${localStatus.self?.dnsName} onlinePeers=${localStatus.onlinePeers.length} port=$port https=$https');
     if (localStatus.active) {
+      _logger.info('[TS-DEBUG] dispatching StartTailscaleScan with ${localStatus.onlinePeers.length} peers: ${localStatus.onlinePeers.map((p) => '${p.hostName}@${p.ip}').take(20).join(', ')}');
       // Desktop: we have CLI access to the full tailnet.
       unawaited(ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
         nodes: localStatus.onlinePeers,

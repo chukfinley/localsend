@@ -61,6 +61,10 @@ final _logger = Logger('ReceiveController');
 class ReceiveController {
   final ServerUtils server;
 
+  /// Tailscale peer IPs we already learned the tailnet from (avoid re-fetching
+  /// on every incoming probe).
+  final Set<String> _learnedTailscalePeers = {};
+
   ReceiveController(this.server);
 
   /// Installs all routes for receiving files.
@@ -139,6 +143,11 @@ class ReceiveController {
       return await request.respondJson(412, message: 'Self-discovered');
     }
 
+    // Reciprocal discovery: if a Tailscale peer just probed us, learn the tailnet
+    // from it. This lets a device without CLI access (mobile) discover the whole
+    // tailnet without any manual favorite — being found is enough to find back.
+    _maybeLearnFromTailscalePeer(request);
+
     final deviceInfo = server.ref.read(deviceInfoProvider);
 
     final dto = InfoDto(
@@ -167,6 +176,53 @@ class ReceiveController {
       'self': status.self == null ? null : nodeToJson(status.self!),
       'peers': status.onlinePeers.map(nodeToJson).toList(),
     });
+  }
+
+  /// If the incoming request came from a Tailscale (100.64.0.0/10) address,
+  /// fetch that peer's tailnet map and probe it. Bootstraps discovery on
+  /// devices that have no Tailscale CLI access (mobile) and no favorites yet.
+  void _maybeLearnFromTailscalePeer(HttpRequest request) {
+    final String peerIp;
+    try {
+      peerIp = request.ip;
+    } catch (_) {
+      return;
+    }
+    if (!_isTailscaleIp(peerIp) || !_learnedTailscalePeers.add(peerIp)) {
+      return;
+    }
+    unawaited(() async {
+      final settings = server.ref.read(settingsProvider);
+      final remote = await server.ref.read(tailscaleProvider).fetchFromPeer(
+            ip: peerIp,
+            port: settings.port,
+            https: settings.https,
+          );
+      if (remote.onlinePeers.isNotEmpty) {
+        _logger.info('Learned ${remote.onlinePeers.length} tailnet peers from $peerIp');
+        await server.ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
+              nodes: remote.onlinePeers,
+              port: settings.port,
+              https: settings.https,
+            ));
+      } else {
+        // The probing peer itself runs LocalSend — probe it directly so it
+        // shows up even if its map was empty.
+        await server.ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
+              nodes: [TailscaleNode(ip: peerIp, dnsName: '', hostName: peerIp, online: true)],
+              port: settings.port,
+              https: settings.https,
+            ));
+      }
+    }());
+  }
+
+  static bool _isTailscaleIp(String ip) {
+    final parts = ip.split('.');
+    if (parts.length != 4) return false;
+    final a = int.tryParse(parts[0]);
+    final b = int.tryParse(parts[1]);
+    return a == 100 && b != null && b >= 64 && b <= 127;
   }
 
   Future<void> _registerHandler({

@@ -8,7 +8,11 @@ import 'package:localsend_app/model/state/nearby_devices_state.dart';
 import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/logging/discovery_logs_provider.dart';
 import 'package:localsend_app/provider/network/tailscale_provider.dart';
+import 'package:localsend_app/provider/security_provider.dart';
+import 'package:logging/logging.dart';
 import 'package:refena_flutter/refena_flutter.dart';
+
+final _tsLogger = Logger('TailscaleScan');
 
 /// This provider is responsible for:
 /// - Scanning the network for other LocalSend instances
@@ -20,6 +24,7 @@ final nearbyDevicesProvider = ReduxProvider<NearbyDevicesService, NearbyDevicesS
     isolateController: ref.notifier(parentIsolateProvider),
     favoriteService: ref.notifier(favoritesProvider),
     discoveryLogs: ref.notifier(discoveryLoggerProvider),
+    ownFingerprint: ref.read(securityProvider).certificateHash,
   );
 });
 
@@ -27,14 +32,17 @@ class NearbyDevicesService extends ReduxNotifier<NearbyDevicesState> {
   final IsolateController _isolateController;
   final FavoritesService _favoriteService;
   final DiscoveryLogger _discoveryLogger;
+  final String _ownFingerprint;
 
   NearbyDevicesService({
     required IsolateController isolateController,
     required FavoritesService favoriteService,
     required DiscoveryLogger discoveryLogs,
+    required String ownFingerprint,
   }) : _discoveryLogger = discoveryLogs,
        _isolateController = isolateController,
-       _favoriteService = favoriteService;
+       _favoriteService = favoriteService,
+       _ownFingerprint = ownFingerprint;
 
   @override
   NearbyDevicesState init() => const NearbyDevicesState(
@@ -81,6 +89,11 @@ class RegisterDeviceAction extends AsyncReduxAction<NearbyDevicesService, Nearby
   @override
   Future<NearbyDevicesState> reduce() async {
     assert(device.ip?.isNotEmpty ?? false, 'IP must not be empty');
+
+    // Never list ourselves (e.g. when discovered via a leftover announcement).
+    if (device.fingerprint == notifier._ownFingerprint) {
+      return state;
+    }
 
     final favoriteDevice = notifier._favoriteService.state.firstWhereOrNull((e) => e.fingerprint == device.fingerprint);
     if (favoriteDevice != null && !favoriteDevice.customAlias) {
@@ -242,6 +255,7 @@ class StartTailscaleScan extends AsyncReduxAction<NearbyDevicesService, NearbyDe
 
   @override
   Future<NearbyDevicesState> reduce() async {
+    _tsLogger.info('[TS-DEBUG] StartTailscaleScan reduce: ${nodes.length} nodes, port=$port https=$https');
     if (nodes.isEmpty) {
       return state;
     }
@@ -255,7 +269,10 @@ class StartTailscaleScan extends AsyncReduxAction<NearbyDevicesService, NearbyDe
       ),
     );
 
+    var found = 0;
     await for (final device in stream) {
+      found++;
+      _tsLogger.info('[TS-DEBUG] found device ${device.alias} @ ${device.ip}:${device.port}');
       final node = nodeByIp[device.ip];
       notifier._discoveryLogger.addLog('[DISCOVER/TS] ${node?.dnsName ?? device.alias} (${device.ip})');
       await dispatchAsync(RegisterDeviceAction(device));
@@ -264,6 +281,7 @@ class StartTailscaleScan extends AsyncReduxAction<NearbyDevicesService, NearbyDe
       }
     }
 
+    _tsLogger.info('[TS-DEBUG] StartTailscaleScan done: probed ${nodes.length} peers, found $found LocalSend devices');
     return state;
   }
 }
