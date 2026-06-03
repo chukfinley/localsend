@@ -102,10 +102,32 @@ class RegisterDeviceAction extends AsyncReduxAction<NearbyDevicesService, Nearby
     } else {
       await Future.microtask(() {});
     }
-    return state.copyWith(
-      devices: {...state.devices}..update(device.ip!, (_) => device, ifAbsent: () => device),
-    );
+
+    // Dedupe by fingerprint: the same device may be reachable under several
+    // addresses (Tailscale 100.x, MagicDNS name, LAN IP) and would otherwise
+    // appear multiple times. Keep one entry, preferring the Tailscale IP.
+    final newDevices = {...state.devices};
+    final existingEntry = newDevices.entries.firstWhereOrNull((e) => e.value.fingerprint == device.fingerprint);
+    if (existingEntry != null) {
+      if (_isTailscaleIp(existingEntry.value.ip) && !_isTailscaleIp(device.ip)) {
+        // Keep the better (Tailscale) entry we already have.
+        return state;
+      }
+      newDevices.remove(existingEntry.key);
+    }
+    newDevices[device.ip!] = device;
+    return state.copyWith(devices: newDevices);
   }
+}
+
+/// True if [ip] is in the Tailscale CGNAT range (100.64.0.0/10).
+bool _isTailscaleIp(String? ip) {
+  if (ip == null) return false;
+  final parts = ip.split('.');
+  if (parts.length != 4) return false;
+  final a = int.tryParse(parts[0]);
+  final b = int.tryParse(parts[1]);
+  return a == 100 && b != null && b >= 64 && b <= 127;
 }
 
 /// Registers a new device found via signaling.
