@@ -42,13 +42,6 @@ class ParentIsolateStateMapper extends ClassMapperBase<ParentIsolateState> {
     >
   >
   _f$httpScanDiscovery = Field('httpScanDiscovery', _$httpScanDiscovery);
-  static IsolateConnector<Device, SendToIsolateData<MulticastTask>>?
-  _$multicastDiscovery(ParentIsolateState v) => v.multicastDiscovery;
-  static const Field<
-    ParentIsolateState,
-    IsolateConnector<Device, SendToIsolateData<MulticastTask>>
-  >
-  _f$multicastDiscovery = Field('multicastDiscovery', _$multicastDiscovery);
   static List<
     IsolateConnector<
       IsolateTaskStreamResult<double>,
@@ -71,7 +64,6 @@ class ParentIsolateStateMapper extends ClassMapperBase<ParentIsolateState> {
   final MappableFields<ParentIsolateState> fields = const {
     #syncState: _f$syncState,
     #httpScanDiscovery: _f$httpScanDiscovery,
-    #multicastDiscovery: _f$multicastDiscovery,
     #httpUpload: _f$httpUpload,
   };
 
@@ -79,7 +71,6 @@ class ParentIsolateStateMapper extends ClassMapperBase<ParentIsolateState> {
     return ParentIsolateState(
       syncState: data.dec(_f$syncState),
       httpScanDiscovery: data.dec(_f$httpScanDiscovery),
-      multicastDiscovery: data.dec(_f$multicastDiscovery),
       httpUpload: data.dec(_f$httpUpload),
     );
   }
@@ -182,8 +173,6 @@ abstract class ParentIsolateStateCopyWith<
       SendToIsolateData<IsolateTask<HttpScanTask>>
     >?
     httpScanDiscovery,
-    IsolateConnector<Device, SendToIsolateData<MulticastTask>>?
-    multicastDiscovery,
     List<
       IsolateConnector<
         IsolateTaskStreamResult<double>,
@@ -236,7 +225,6 @@ class _ParentIsolateStateCopyWithImpl<$R, $Out>
   $R call({
     SyncState? syncState,
     Object? httpScanDiscovery = $none,
-    Object? multicastDiscovery = $none,
     List<
       IsolateConnector<
         IsolateTaskStreamResult<double>,
@@ -248,7 +236,6 @@ class _ParentIsolateStateCopyWithImpl<$R, $Out>
     FieldCopyWithData({
       if (syncState != null) #syncState: syncState,
       if (httpScanDiscovery != $none) #httpScanDiscovery: httpScanDiscovery,
-      if (multicastDiscovery != $none) #multicastDiscovery: multicastDiscovery,
       if (httpUpload != null) #httpUpload: httpUpload,
     }),
   );
@@ -258,10 +245,6 @@ class _ParentIsolateStateCopyWithImpl<$R, $Out>
     httpScanDiscovery: data.get(
       #httpScanDiscovery,
       or: $value.httpScanDiscovery,
-    ),
-    multicastDiscovery: data.get(
-      #multicastDiscovery,
-      or: $value.multicastDiscovery,
     ),
     httpUpload: data.get(#httpUpload, or: $value.httpUpload),
   );

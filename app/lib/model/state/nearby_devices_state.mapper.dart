@@ -29,11 +29,6 @@ class NearbyDevicesStateMapper extends ClassMapperBase<NearbyDevicesState> {
     'runningFavoriteScan',
     _$runningFavoriteScan,
   );
-  static Set<String> _$runningIps(NearbyDevicesState v) => v.runningIps;
-  static const Field<NearbyDevicesState, Set<String>> _f$runningIps = Field(
-    'runningIps',
-    _$runningIps,
-  );
   static Map<String, Device> _$devices(NearbyDevicesState v) => v.devices;
   static const Field<NearbyDevicesState, Map<String, Device>> _f$devices =
       Field('devices', _$devices);
@@ -45,7 +40,6 @@ class NearbyDevicesStateMapper extends ClassMapperBase<NearbyDevicesState> {
   @override
   final MappableFields<NearbyDevicesState> fields = const {
     #runningFavoriteScan: _f$runningFavoriteScan,
-    #runningIps: _f$runningIps,
     #devices: _f$devices,
     #signalingDevices: _f$signalingDevices,
   };
@@ -53,7 +47,6 @@ class NearbyDevicesStateMapper extends ClassMapperBase<NearbyDevicesState> {
   static NearbyDevicesState _instantiate(DecodingData data) {
     return NearbyDevicesState(
       runningFavoriteScan: data.dec(_f$runningFavoriteScan),
-      runningIps: data.dec(_f$runningIps),
       devices: data.dec(_f$devices),
       signalingDevices: data.dec(_f$signalingDevices),
     );
@@ -141,7 +134,6 @@ abstract class NearbyDevicesStateCopyWith<
   get signalingDevices;
   $R call({
     bool? runningFavoriteScan,
-    Set<String>? runningIps,
     Map<String, Device>? devices,
     Map<String, Set<Device>>? signalingDevices,
   });
@@ -180,14 +172,12 @@ class _NearbyDevicesStateCopyWithImpl<$R, $Out>
   @override
   $R call({
     bool? runningFavoriteScan,
-    Set<String>? runningIps,
     Map<String, Device>? devices,
     Map<String, Set<Device>>? signalingDevices,
   }) => $apply(
     FieldCopyWithData({
       if (runningFavoriteScan != null)
         #runningFavoriteScan: runningFavoriteScan,
-      if (runningIps != null) #runningIps: runningIps,
       if (devices != null) #devices: devices,
       if (signalingDevices != null) #signalingDevices: signalingDevices,
     }),
@@ -198,7 +188,6 @@ class _NearbyDevicesStateCopyWithImpl<$R, $Out>
       #runningFavoriteScan,
       or: $value.runningFavoriteScan,
     ),
-    runningIps: data.get(#runningIps, or: $value.runningIps),
     devices: data.get(#devices, or: $value.devices),
     signalingDevices: data.get(#signalingDevices, or: $value.signalingDevices),
   );

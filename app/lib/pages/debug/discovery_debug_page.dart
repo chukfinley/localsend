@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:localsend_app/provider/logging/discovery_logs_provider.dart';
-import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
 import 'package:localsend_app/widget/copyable_text.dart';
 import 'package:localsend_app/widget/custom_basic_appbar.dart';
 import 'package:localsend_app/widget/responsive_list_view.dart';
@@ -23,11 +22,6 @@ class DiscoveryDebugPage extends StatelessWidget {
         children: [
           Row(
             children: [
-              ElevatedButton(
-                onPressed: () => ref.redux(nearbyDevicesProvider).dispatch(StartMulticastScan()),
-                child: const Text('Announce'),
-              ),
-              const SizedBox(width: 20),
               ElevatedButton(
                 onPressed: () => ref.notifier(discoveryLoggerProvider).clear(),
                 child: const Text('Clear'),

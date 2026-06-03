@@ -73,7 +73,6 @@ class DiscoveryMethodMapper extends ClassMapperBase<DiscoveryMethod> {
   static DiscoveryMethodMapper ensureInitialized() {
     if (_instance == null) {
       MapperContainer.globals.use(_instance = DiscoveryMethodMapper._());
-      MulticastDiscoveryMapper.ensureInitialized();
       HttpDiscoveryMapper.ensureInitialized();
       SignalingDiscoveryMapper.ensureInitialized();
     }
@@ -115,125 +114,6 @@ abstract class DiscoveryMethodCopyWith<$R, $In extends DiscoveryMethod, $Out>
   DiscoveryMethodCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
   );
-}
-
-class MulticastDiscoveryMapper extends ClassMapperBase<MulticastDiscovery> {
-  MulticastDiscoveryMapper._();
-
-  static MulticastDiscoveryMapper? _instance;
-  static MulticastDiscoveryMapper ensureInitialized() {
-    if (_instance == null) {
-      MapperContainer.globals.use(_instance = MulticastDiscoveryMapper._());
-      DiscoveryMethodMapper.ensureInitialized();
-    }
-    return _instance!;
-  }
-
-  @override
-  final String id = 'MulticastDiscovery';
-
-  @override
-  final MappableFields<MulticastDiscovery> fields = const {};
-
-  static MulticastDiscovery _instantiate(DecodingData data) {
-    return MulticastDiscovery();
-  }
-
-  @override
-  final Function instantiate = _instantiate;
-
-  static MulticastDiscovery fromJson(Map<String, dynamic> map) {
-    return ensureInitialized().decodeMap<MulticastDiscovery>(map);
-  }
-
-  static MulticastDiscovery deserialize(String json) {
-    return ensureInitialized().decodeJson<MulticastDiscovery>(json);
-  }
-}
-
-mixin MulticastDiscoveryMappable {
-  String serialize() {
-    return MulticastDiscoveryMapper.ensureInitialized()
-        .encodeJson<MulticastDiscovery>(this as MulticastDiscovery);
-  }
-
-  Map<String, dynamic> toJson() {
-    return MulticastDiscoveryMapper.ensureInitialized()
-        .encodeMap<MulticastDiscovery>(this as MulticastDiscovery);
-  }
-
-  MulticastDiscoveryCopyWith<
-    MulticastDiscovery,
-    MulticastDiscovery,
-    MulticastDiscovery
-  >
-  get copyWith =>
-      _MulticastDiscoveryCopyWithImpl<MulticastDiscovery, MulticastDiscovery>(
-        this as MulticastDiscovery,
-        $identity,
-        $identity,
-      );
-  @override
-  String toString() {
-    return MulticastDiscoveryMapper.ensureInitialized().stringifyValue(
-      this as MulticastDiscovery,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return MulticastDiscoveryMapper.ensureInitialized().equalsValue(
-      this as MulticastDiscovery,
-      other,
-    );
-  }
-
-  @override
-  int get hashCode {
-    return MulticastDiscoveryMapper.ensureInitialized().hashValue(
-      this as MulticastDiscovery,
-    );
-  }
-}
-
-extension MulticastDiscoveryValueCopy<$R, $Out>
-    on ObjectCopyWith<$R, MulticastDiscovery, $Out> {
-  MulticastDiscoveryCopyWith<$R, MulticastDiscovery, $Out>
-  get $asMulticastDiscovery => $base.as(
-    (v, t, t2) => _MulticastDiscoveryCopyWithImpl<$R, $Out>(v, t, t2),
-  );
-}
-
-abstract class MulticastDiscoveryCopyWith<
-  $R,
-  $In extends MulticastDiscovery,
-  $Out
->
-    implements DiscoveryMethodCopyWith<$R, $In, $Out> {
-  @override
-  $R call();
-  MulticastDiscoveryCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
-    Then<$Out2, $R2> t,
-  );
-}
-
-class _MulticastDiscoveryCopyWithImpl<$R, $Out>
-    extends ClassCopyWithBase<$R, MulticastDiscovery, $Out>
-    implements MulticastDiscoveryCopyWith<$R, MulticastDiscovery, $Out> {
-  _MulticastDiscoveryCopyWithImpl(super.value, super.then, super.then2);
-
-  @override
-  late final ClassMapperBase<MulticastDiscovery> $mapper =
-      MulticastDiscoveryMapper.ensureInitialized();
-  @override
-  $R call() => $apply(FieldCopyWithData({}));
-  @override
-  MulticastDiscovery $make(CopyWithData data) => MulticastDiscovery();
-
-  @override
-  MulticastDiscoveryCopyWith<$R2, MulticastDiscovery, $Out2> $chain<$R2, $Out2>(
-    Then<$Out2, $R2> t,
-  ) => _MulticastDiscoveryCopyWithImpl<$R2, $Out2>($value, $cast, t);
 }
 
 class HttpDiscoveryMapper extends ClassMapperBase<HttpDiscovery> {

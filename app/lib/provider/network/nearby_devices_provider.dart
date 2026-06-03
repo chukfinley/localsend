@@ -44,23 +44,9 @@ class NearbyDevicesService extends ReduxNotifier<NearbyDevicesState> {
   @override
   NearbyDevicesState init() => const NearbyDevicesState(
     runningFavoriteScan: false,
-    runningIps: {},
     devices: {},
     signalingDevices: {},
   );
-}
-
-/// Binds the UDP port and listens for incoming announcements.
-/// This should run forever as long as the app is running.
-class StartMulticastListener extends AsyncReduxAction<NearbyDevicesService, NearbyDevicesState> {
-  @override
-  Future<NearbyDevicesState> reduce() async {
-    await for (final device in notifier._isolateController.state.multicastDiscovery!.receiveFromIsolate) {
-      await dispatchAsync(RegisterDeviceAction(device));
-      notifier._discoveryLogger.addLog('[DISCOVER/UDP] ${device.alias} (${device.ip}, model: ${device.deviceModel})');
-    }
-    return state;
-  }
 }
 
 /// Removes all found devices from the state.
@@ -166,58 +152,6 @@ class UnregisterSignalingDeviceAction extends ReduxAction<NearbyDevicesService, 
   }
 }
 
-/// It does not really "scan".
-/// It just sends an announcement which will cause a response on every other LocalSend member of the network.
-class StartMulticastScan extends ReduxAction<NearbyDevicesService, NearbyDevicesState> {
-  @override
-  NearbyDevicesState reduce() {
-    external(notifier._isolateController).dispatch(IsolateSendMulticastAnnouncementAction());
-    return state;
-  }
-}
-
-/// Scans one particular subnet with traditional HTTP/TCP discovery.
-/// This method awaits until the scan is finished.
-class StartLegacyScan extends AsyncReduxAction<NearbyDevicesService, NearbyDevicesState> {
-  final int port;
-  final String localIp;
-  final bool https;
-
-  StartLegacyScan({
-    required this.port,
-    required this.localIp,
-    required this.https,
-  });
-
-  @override
-  Future<NearbyDevicesState> reduce() async {
-    if (state.runningIps.contains(localIp)) {
-      // already running for the same localIp
-      await Future.microtask(() {});
-      return state;
-    }
-
-    dispatch(_SetRunningIpsAction({...state.runningIps, localIp}));
-
-    final stream = external(notifier._isolateController).dispatchTakeResult(
-      IsolateInterfaceHttpDiscoveryAction(
-        networkInterface: localIp,
-        port: port,
-        https: https,
-      ),
-    );
-
-    await for (final device in stream) {
-      notifier._discoveryLogger.addLog('[DISCOVER/TCP] ${device.alias} (${device.ip}, model: ${device.deviceModel})');
-      await dispatchAsync(RegisterDeviceAction(device));
-    }
-
-    return state.copyWith(
-      runningIps: state.runningIps.where((ip) => ip != localIp).toSet(),
-    );
-  }
-}
-
 class StartFavoriteScan extends AsyncReduxAction<NearbyDevicesService, NearbyDevicesState> {
   final List<FavoriteDevice> devices;
   final bool https;
@@ -304,19 +238,6 @@ class UpsertTailscaleFavoriteAction extends AsyncReduxAction<NearbyDevicesServic
     }
 
     return state;
-  }
-}
-
-class _SetRunningIpsAction extends ReduxAction<NearbyDevicesService, NearbyDevicesState> {
-  final Set<String> runningIps;
-
-  _SetRunningIpsAction(this.runningIps);
-
-  @override
-  NearbyDevicesState reduce() {
-    return state.copyWith(
-      runningIps: runningIps,
-    );
   }
 }
 

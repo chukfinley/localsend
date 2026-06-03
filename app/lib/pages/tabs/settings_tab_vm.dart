@@ -14,7 +14,6 @@ class SettingsTabVm with SettingsTabVmMappable {
   final TextEditingController deviceModelController;
   final TextEditingController portController;
   final TextEditingController timeoutController;
-  final TextEditingController multicastController;
 
   final SettingsState settings;
   final ServerState? serverState;
@@ -41,7 +40,6 @@ class SettingsTabVm with SettingsTabVmMappable {
     required this.deviceModelController,
     required this.portController,
     required this.timeoutController,
-    required this.multicastController,
     required this.settings,
     required this.serverState,
     required this.deviceInfo,

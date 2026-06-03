@@ -176,7 +176,6 @@ Future<RefenaContainer> preInit(List<String> args) async {
             networkWhitelist: settings.networkWhitelist,
             networkBlacklist: settings.networkBlacklist,
             protocol: settings.https ? ProtocolType.https : ProtocolType.http,
-            multicastGroup: settings.multicastGroup,
             discoveryTimeout: settings.discoveryTimeout,
             serverRunning: true,
             download: false,

@@ -19,7 +19,6 @@ final settingsProvider = NotifierProvider<SettingsService, SettingsState>(
     final syncState = ref.read(parentIsolateProvider).syncState;
     if (_listEq(syncState.networkWhitelist, next.networkWhitelist) &&
         _listEq(syncState.networkBlacklist, next.networkBlacklist) &&
-        syncState.multicastGroup == next.multicastGroup &&
         syncState.discoveryTimeout == next.discoveryTimeout) {
       return;
     }
@@ -30,7 +29,6 @@ final settingsProvider = NotifierProvider<SettingsService, SettingsState>(
           IsolateSyncSettingsAction(
             networkWhitelist: next.networkWhitelist,
             networkBlacklist: next.networkBlacklist,
-            multicastGroup: next.multicastGroup,
             discoveryTimeout: next.discoveryTimeout,
           ),
         );
@@ -52,7 +50,6 @@ class SettingsService extends PureNotifier<SettingsState> {
     port: _persistence.getPort(),
     networkWhitelist: _persistence.getNetworkWhitelist(),
     networkBlacklist: _persistence.getNetworkBlacklist(),
-    multicastGroup: _persistence.getMulticastGroup(),
     destination: _persistence.getDestination(),
     saveToGallery: _persistence.isSaveToGallery(),
     saveToHistory: _persistence.isSaveToHistory(),
@@ -132,13 +129,6 @@ class SettingsService extends PureNotifier<SettingsState> {
     await _persistence.setDiscoveryTimeout(timeout);
     state = state.copyWith(
       discoveryTimeout: timeout,
-    );
-  }
-
-  Future<void> setMulticastGroup(String group) async {
-    await _persistence.setMulticastGroup(group);
-    state = state.copyWith(
-      multicastGroup: group,
     );
   }
 

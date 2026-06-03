@@ -17,11 +17,6 @@ sealed class DiscoveryMethod with DiscoveryMethodMappable {
 }
 
 @MappableClass()
-class MulticastDiscovery extends DiscoveryMethod with MulticastDiscoveryMappable {
-  const MulticastDiscovery();
-}
-
-@MappableClass()
 class HttpDiscovery extends DiscoveryMethod with HttpDiscoveryMappable {
   final String ip;
 

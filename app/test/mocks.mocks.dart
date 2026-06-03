@@ -300,30 +300,6 @@ class MockPersistenceService extends _i1.Mock
           as _i4.Future<void>);
 
   @override
-  String getMulticastGroup() =>
-      (super.noSuchMethod(
-            Invocation.method(#getMulticastGroup, []),
-            returnValue: _i7.dummyValue<String>(
-              this,
-              Invocation.method(#getMulticastGroup, []),
-            ),
-            returnValueForMissingStub: _i7.dummyValue<String>(
-              this,
-              Invocation.method(#getMulticastGroup, []),
-            ),
-          )
-          as String);
-
-  @override
-  _i4.Future<void> setMulticastGroup(String? group) =>
-      (super.noSuchMethod(
-            Invocation.method(#setMulticastGroup, [group]),
-            returnValue: _i4.Future<void>.value(),
-            returnValueForMissingStub: _i4.Future<void>.value(),
-          )
-          as _i4.Future<void>);
-
-  @override
   _i4.Future<void> setDestination(String? destination) =>
       (super.noSuchMethod(
             Invocation.method(#setDestination, [destination]),

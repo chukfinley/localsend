@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:common/model/device.dart';
 import 'package:common/src/isolate/child/http_scan_discovery_isolate.dart';
-import 'package:common/src/isolate/child/multicast_discovery_isolate.dart';
 import 'package:common/src/isolate/child/upload_isolate.dart';
 import 'package:common/src/isolate/dto/isolate_task.dart';
 import 'package:common/src/isolate/dto/isolate_task_result.dart';
@@ -76,40 +75,6 @@ class IsolateFavoriteHttpDiscoveryAction extends ReduxActionWithResult<IsolateCo
         connection: connection,
       )
     );
-  }
-}
-
-class IsolateSendMulticastAnnouncementAction extends ReduxAction<IsolateController, ParentIsolateState> {
-  @override
-  ParentIsolateState reduce() {
-    final connection = state.multicastDiscovery;
-    if (connection == null) {
-      throw StateError('multicastDiscovery is not initialized');
-    }
-
-    connection.sendToIsolate(SendToIsolateData(
-      syncState: null,
-      data: MulticastAnnouncementTask.instance,
-    ));
-
-    return state;
-  }
-}
-
-class IsolateSendMulticastRestartListenerAction extends ReduxAction<IsolateController, ParentIsolateState> {
-  @override
-  ParentIsolateState reduce() {
-    final connection = state.multicastDiscovery;
-    if (connection == null) {
-      throw StateError('multicastDiscovery is not initialized');
-    }
-
-    connection.sendToIsolate(SendToIsolateData(
-      syncState: null,
-      data: MulticastRestartListenerTask.instance,
-    ));
-
-    return state;
   }
 }
 

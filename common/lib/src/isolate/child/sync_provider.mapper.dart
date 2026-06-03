@@ -73,11 +73,6 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
     'protocol',
     _$protocol,
   );
-  static String _$multicastGroup(SyncState v) => v.multicastGroup;
-  static const Field<SyncState, String> _f$multicastGroup = Field(
-    'multicastGroup',
-    _$multicastGroup,
-  );
   static int _$discoveryTimeout(SyncState v) => v.discoveryTimeout;
   static const Field<SyncState, int> _f$discoveryTimeout = Field(
     'discoveryTimeout',
@@ -106,7 +101,6 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
     #networkWhitelist: _f$networkWhitelist,
     #networkBlacklist: _f$networkBlacklist,
     #protocol: _f$protocol,
-    #multicastGroup: _f$multicastGroup,
     #discoveryTimeout: _f$discoveryTimeout,
     #serverRunning: _f$serverRunning,
     #download: _f$download,
@@ -124,7 +118,6 @@ class SyncStateMapper extends ClassMapperBase<SyncState> {
       networkWhitelist: data.dec(_f$networkWhitelist),
       networkBlacklist: data.dec(_f$networkBlacklist),
       protocol: data.dec(_f$protocol),
-      multicastGroup: data.dec(_f$multicastGroup),
       discoveryTimeout: data.dec(_f$discoveryTimeout),
       serverRunning: data.dec(_f$serverRunning),
       download: data.dec(_f$download),
@@ -212,7 +205,6 @@ abstract class SyncStateCopyWith<$R, $In extends SyncState, $Out>
     List<String>? networkWhitelist,
     List<String>? networkBlacklist,
     ProtocolType? protocol,
-    String? multicastGroup,
     int? discoveryTimeout,
     bool? serverRunning,
     bool? download,
@@ -267,7 +259,6 @@ class _SyncStateCopyWithImpl<$R, $Out>
     Object? networkWhitelist = $none,
     Object? networkBlacklist = $none,
     ProtocolType? protocol,
-    String? multicastGroup,
     int? discoveryTimeout,
     bool? serverRunning,
     bool? download,
@@ -283,7 +274,6 @@ class _SyncStateCopyWithImpl<$R, $Out>
       if (networkWhitelist != $none) #networkWhitelist: networkWhitelist,
       if (networkBlacklist != $none) #networkBlacklist: networkBlacklist,
       if (protocol != null) #protocol: protocol,
-      if (multicastGroup != null) #multicastGroup: multicastGroup,
       if (discoveryTimeout != null) #discoveryTimeout: discoveryTimeout,
       if (serverRunning != null) #serverRunning: serverRunning,
       if (download != null) #download: download,
@@ -304,7 +294,6 @@ class _SyncStateCopyWithImpl<$R, $Out>
     networkWhitelist: data.get(#networkWhitelist, or: $value.networkWhitelist),
     networkBlacklist: data.get(#networkBlacklist, or: $value.networkBlacklist),
     protocol: data.get(#protocol, or: $value.protocol),
-    multicastGroup: data.get(#multicastGroup, or: $value.multicastGroup),
     discoveryTimeout: data.get(#discoveryTimeout, or: $value.discoveryTimeout),
     serverRunning: data.get(#serverRunning, or: $value.serverRunning),
     download: data.get(#download, or: $value.download),

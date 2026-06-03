@@ -17,7 +17,6 @@ class SettingsState with SettingsStateMappable {
   final int port;
   final List<String>? networkWhitelist; // null = disabled
   final List<String>? networkBlacklist; // null = disabled
-  final String multicastGroup;
   final String? destination; // null = default
   final bool saveToGallery; // only Android, iOS
   final bool saveToHistory;
@@ -45,7 +44,6 @@ class SettingsState with SettingsStateMappable {
     required this.port,
     required this.networkWhitelist,
     required this.networkBlacklist,
-    required this.multicastGroup,
     required this.destination,
     required this.saveToGallery,
     required this.saveToHistory,

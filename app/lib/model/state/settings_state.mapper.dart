@@ -59,11 +59,6 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     'networkBlacklist',
     _$networkBlacklist,
   );
-  static String _$multicastGroup(SettingsState v) => v.multicastGroup;
-  static const Field<SettingsState, String> _f$multicastGroup = Field(
-    'multicastGroup',
-    _$multicastGroup,
-  );
   static String? _$destination(SettingsState v) => v.destination;
   static const Field<SettingsState, String> _f$destination = Field(
     'destination',
@@ -159,7 +154,6 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
     #port: _f$port,
     #networkWhitelist: _f$networkWhitelist,
     #networkBlacklist: _f$networkBlacklist,
-    #multicastGroup: _f$multicastGroup,
     #destination: _f$destination,
     #saveToGallery: _f$saveToGallery,
     #saveToHistory: _f$saveToHistory,
@@ -189,7 +183,6 @@ class SettingsStateMapper extends ClassMapperBase<SettingsState> {
       port: data.dec(_f$port),
       networkWhitelist: data.dec(_f$networkWhitelist),
       networkBlacklist: data.dec(_f$networkBlacklist),
-      multicastGroup: data.dec(_f$multicastGroup),
       destination: data.dec(_f$destination),
       saveToGallery: data.dec(_f$saveToGallery),
       saveToHistory: data.dec(_f$saveToHistory),
@@ -285,7 +278,6 @@ abstract class SettingsStateCopyWith<$R, $In extends SettingsState, $Out>
     int? port,
     List<String>? networkWhitelist,
     List<String>? networkBlacklist,
-    String? multicastGroup,
     String? destination,
     bool? saveToGallery,
     bool? saveToHistory,
@@ -343,7 +335,6 @@ class _SettingsStateCopyWithImpl<$R, $Out>
     int? port,
     Object? networkWhitelist = $none,
     Object? networkBlacklist = $none,
-    String? multicastGroup,
     Object? destination = $none,
     bool? saveToGallery,
     bool? saveToHistory,
@@ -371,7 +362,6 @@ class _SettingsStateCopyWithImpl<$R, $Out>
       if (port != null) #port: port,
       if (networkWhitelist != $none) #networkWhitelist: networkWhitelist,
       if (networkBlacklist != $none) #networkBlacklist: networkBlacklist,
-      if (multicastGroup != null) #multicastGroup: multicastGroup,
       if (destination != $none) #destination: destination,
       if (saveToGallery != null) #saveToGallery: saveToGallery,
       if (saveToHistory != null) #saveToHistory: saveToHistory,
@@ -404,7 +394,6 @@ class _SettingsStateCopyWithImpl<$R, $Out>
     port: data.get(#port, or: $value.port),
     networkWhitelist: data.get(#networkWhitelist, or: $value.networkWhitelist),
     networkBlacklist: data.get(#networkBlacklist, or: $value.networkBlacklist),
-    multicastGroup: data.get(#multicastGroup, or: $value.multicastGroup),
     destination: data.get(#destination, or: $value.destination),
     saveToGallery: data.get(#saveToGallery, or: $value.saveToGallery),
     saveToHistory: data.get(#saveToHistory, or: $value.saveToHistory),

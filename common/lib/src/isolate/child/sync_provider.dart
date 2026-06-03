@@ -22,7 +22,6 @@ class SyncState with SyncStateMappable {
   final List<String>? networkWhitelist;
   final List<String>? networkBlacklist;
   final ProtocolType protocol;
-  final String multicastGroup;
   final int discoveryTimeout;
 
   final bool serverRunning;
@@ -39,7 +38,6 @@ class SyncState with SyncStateMappable {
     required this.networkWhitelist,
     required this.networkBlacklist,
     required this.protocol,
-    required this.multicastGroup,
     required this.discoveryTimeout,
     required this.serverRunning,
     required this.download,
@@ -47,7 +45,7 @@ class SyncState with SyncStateMappable {
 
   @override
   String toString() {
-    return 'SyncState(securityContext: <SecurityContext>, deviceInfo: $deviceInfo, alias: $alias, port: $port, networkWhitelist: $networkWhitelist, networkBlacklist: $networkBlacklist, protocol: $protocol, multicastGroup: $multicastGroup, discoveryTimeout: $discoveryTimeout, serverRunning: $serverRunning, download: $download)';
+    return 'SyncState(securityContext: <SecurityContext>, deviceInfo: $deviceInfo, alias: $alias, port: $port, networkWhitelist: $networkWhitelist, networkBlacklist: $networkBlacklist, protocol: $protocol, discoveryTimeout: $discoveryTimeout, serverRunning: $serverRunning, download: $download)';
   }
 }
 

@@ -449,17 +449,6 @@ class SettingsTab extends StatelessWidget {
                             }
                           },
                         ),
-                      if (vm.advanced)
-                        _SettingsEntry(
-                          label: t.settingsTab.network.multicastGroup,
-                          child: TextFieldTv(
-                            name: t.settingsTab.network.multicastGroup,
-                            controller: vm.multicastController,
-                            onChanged: (s) async {
-                              await ref.notifier(settingsProvider).setMulticastGroup(s);
-                            },
-                          ),
-                        ),
                       AnimatedCrossFade(
                         crossFadeState: vm.settings.port != defaultPort ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                         duration: const Duration(milliseconds: 200),
@@ -469,19 +458,6 @@ class SettingsTab extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 15),
                           child: Text(
                             t.settingsTab.network.portWarning(defaultPort: defaultPort),
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ),
-                      ),
-                      AnimatedCrossFade(
-                        crossFadeState: vm.settings.multicastGroup != defaultMulticastGroup ? CrossFadeState.showSecond : CrossFadeState.showFirst,
-                        duration: const Duration(milliseconds: 200),
-                        alignment: Alignment.topLeft,
-                        firstChild: Container(),
-                        secondChild: Padding(
-                          padding: const EdgeInsets.only(bottom: 15),
-                          child: Text(
-                            t.settingsTab.network.multicastGroupWarning(defaultMulticast: defaultMulticastGroup),
                             style: const TextStyle(color: Colors.grey),
                           ),
                         ),

@@ -1,7 +1,6 @@
 import 'package:common/model/device.dart';
 import 'package:common/src/isolate/child/http_scan_discovery_isolate.dart';
 import 'package:common/src/isolate/child/main.dart';
-import 'package:common/src/isolate/child/multicast_discovery_isolate.dart';
 import 'package:common/src/isolate/child/sync_provider.dart';
 import 'package:common/src/isolate/child/upload_isolate.dart';
 import 'package:common/src/isolate/dto/isolate_task.dart';
@@ -23,21 +22,18 @@ const _uploadIsolateCount = 2;
 class ParentIsolateState with ParentIsolateStateMappable {
   final SyncState syncState;
   final IsolateConnector<IsolateTaskStreamResult<Device>, SendToIsolateData<IsolateTask<HttpScanTask>>>? httpScanDiscovery;
-  final IsolateConnector<Device, SendToIsolateData<MulticastTask>>? multicastDiscovery;
   final List<IsolateConnector<IsolateTaskStreamResult<double>, SendToIsolateData<IsolateTask<BaseHttpUploadTask>>>> httpUpload;
   int get uploadIsolateCount => httpUpload.length;
 
   ParentIsolateState({
     required this.syncState,
     required this.httpScanDiscovery,
-    required this.multicastDiscovery,
     required this.httpUpload,
   });
 
   static ParentIsolateState initial(SyncState syncState) => ParentIsolateState(
         syncState: syncState,
         httpScanDiscovery: null,
-        multicastDiscovery: null,
         httpUpload: [],
       );
 
@@ -82,14 +78,6 @@ class IsolateSetupAction extends AsyncReduxAction<IsolateController, ParentIsola
       ),
     );
 
-    final multicastDiscovery = await startIsolate<Device, SendToIsolateData<MulticastTask>, InitialData>(
-      task: setupMulticastDiscoveryIsolate,
-      param: InitialData(
-        syncState: state.syncState,
-        logLevel: Logger.root.level,
-      ),
-    );
-
     final httpUploadIsolates = List.generate(
       _uploadIsolateCount,
       (index) async {
@@ -118,7 +106,6 @@ class IsolateSetupAction extends AsyncReduxAction<IsolateController, ParentIsola
 
     return state.copyWith(
       httpScanDiscovery: httpScanDiscovery,
-      multicastDiscovery: multicastDiscovery,
       httpUpload: await Future.wait(httpUploadIsolates),
     );
   }
@@ -128,7 +115,6 @@ class IsolateDisposeAction extends ReduxAction<IsolateController, ParentIsolateS
   @override
   ParentIsolateState reduce() {
     state.httpScanDiscovery?.isolate.kill();
-    state.multicastDiscovery?.isolate.kill();
     for (final httpUpload in state.httpUpload) {
       httpUpload.isolate.kill();
     }

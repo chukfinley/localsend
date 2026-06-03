@@ -74,7 +74,6 @@ const _portKey = 'ls_port';
 const _networkWhitelistKey = 'ls_network_whitelist';
 const _networkBlacklistKey = 'ls_network_blacklist';
 const _timeoutKey = 'ls_timeout';
-const _multicastGroupKey = 'ls_multicast_group';
 const _destinationKey = 'ls_destination';
 const _saveToGallery = 'ls_save_to_gallery';
 const _saveToHistory = 'ls_save_to_history';
@@ -365,14 +364,6 @@ class PersistenceService {
 
   Future<void> setShareViaLinkAutoAccept(bool shareViaLinkAutoAccept) async {
     await _prefs.setBool(_shareViaLinkAutoAccept, shareViaLinkAutoAccept);
-  }
-
-  String getMulticastGroup() {
-    return _prefs.getString(_multicastGroupKey) ?? defaultMulticastGroup;
-  }
-
-  Future<void> setMulticastGroup(String group) async {
-    await _prefs.setString(_multicastGroupKey, group);
   }
 
   String? getDestination() {
