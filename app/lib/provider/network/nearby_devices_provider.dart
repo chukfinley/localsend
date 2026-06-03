@@ -203,7 +203,9 @@ class StartFavoriteScan extends AsyncReduxAction<NearbyDevicesService, NearbyDev
 
     final stream = external(notifier._isolateController).dispatchTakeResult(
       IsolateFavoriteHttpDiscoveryAction(
-        favorites: devices.map((e) => (e.ip, e.port)).toList(),
+        // Probe every known address of each favorite (LAN IP, Tailscale 100.x,
+        // MagicDNS name, ...). Results are deduplicated by fingerprint.
+        favorites: devices.expand((e) => e.allAddresses.map((a) => (a, e.port))).toList(),
         https: https,
       ),
     );

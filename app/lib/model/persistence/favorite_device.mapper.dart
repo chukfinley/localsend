@@ -2,6 +2,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 // ignore_for_file: type=lint
+// ignore_for_file: invalid_use_of_protected_member
 // ignore_for_file: unused_element, unnecessary_cast, override_on_non_overriding_member
 // ignore_for_file: strict_raw_type, inference_failure_on_untyped_parameter
 
@@ -41,6 +42,13 @@ class FavoriteDeviceMapper extends ClassMapperBase<FavoriteDevice> {
     opt: true,
     def: false,
   );
+  static List<String> _$addresses(FavoriteDevice v) => v.addresses;
+  static const Field<FavoriteDevice, List<String>> _f$addresses = Field(
+    'addresses',
+    _$addresses,
+    opt: true,
+    def: const [],
+  );
 
   @override
   final MappableFields<FavoriteDevice> fields = const {
@@ -50,6 +58,7 @@ class FavoriteDeviceMapper extends ClassMapperBase<FavoriteDevice> {
     #port: _f$port,
     #alias: _f$alias,
     #customAlias: _f$customAlias,
+    #addresses: _f$addresses,
   };
 
   static FavoriteDevice _instantiate(DecodingData data) {
@@ -60,6 +69,7 @@ class FavoriteDeviceMapper extends ClassMapperBase<FavoriteDevice> {
       port: data.dec(_f$port),
       alias: data.dec(_f$alias),
       customAlias: data.dec(_f$customAlias),
+      addresses: data.dec(_f$addresses),
     );
   }
 
@@ -125,6 +135,7 @@ extension FavoriteDeviceValueCopy<$R, $Out>
 
 abstract class FavoriteDeviceCopyWith<$R, $In extends FavoriteDevice, $Out>
     implements ClassCopyWith<$R, $In, $Out> {
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get addresses;
   $R call({
     String? id,
     String? fingerprint,
@@ -132,6 +143,7 @@ abstract class FavoriteDeviceCopyWith<$R, $In extends FavoriteDevice, $Out>
     int? port,
     String? alias,
     bool? customAlias,
+    List<String>? addresses,
   });
   FavoriteDeviceCopyWith<$R2, $In, $Out2> $chain<$R2, $Out2>(
     Then<$Out2, $R2> t,
@@ -147,6 +159,13 @@ class _FavoriteDeviceCopyWithImpl<$R, $Out>
   late final ClassMapperBase<FavoriteDevice> $mapper =
       FavoriteDeviceMapper.ensureInitialized();
   @override
+  ListCopyWith<$R, String, ObjectCopyWith<$R, String, String>> get addresses =>
+      ListCopyWith(
+        $value.addresses,
+        (v, t) => ObjectCopyWith(v, $identity, t),
+        (v) => call(addresses: v),
+      );
+  @override
   $R call({
     String? id,
     String? fingerprint,
@@ -154,6 +173,7 @@ class _FavoriteDeviceCopyWithImpl<$R, $Out>
     int? port,
     String? alias,
     bool? customAlias,
+    List<String>? addresses,
   }) => $apply(
     FieldCopyWithData({
       if (id != null) #id: id,
@@ -162,6 +182,7 @@ class _FavoriteDeviceCopyWithImpl<$R, $Out>
       if (port != null) #port: port,
       if (alias != null) #alias: alias,
       if (customAlias != null) #customAlias: customAlias,
+      if (addresses != null) #addresses: addresses,
     }),
   );
   @override
@@ -172,6 +193,7 @@ class _FavoriteDeviceCopyWithImpl<$R, $Out>
     port: data.get(#port, or: $value.port),
     alias: data.get(#alias, or: $value.alias),
     customAlias: data.get(#customAlias, or: $value.customAlias),
+    addresses: data.get(#addresses, or: $value.addresses),
   );
 
   @override

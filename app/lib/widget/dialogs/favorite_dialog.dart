@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:common/model/device.dart';
 import 'package:flutter/material.dart';
 import 'package:localsend_app/config/theme.dart';
@@ -27,26 +29,52 @@ class _FavoritesDialogState extends State<FavoritesDialog> with Refena {
   String? _error;
 
   /// Checks if the device is reachable and pops the dialog with the result if it is.
+  ///
+  /// All known addresses of the favorite (LAN IP, Tailscale 100.x, MagicDNS name,
+  /// hotspot IP, ...) are probed in parallel; the first one that answers wins.
+  /// The winning address is promoted to primary and the alias is synced from the
+  /// device unless the user set a custom one.
   Future<void> _checkConnectionToDevice(FavoriteDevice favorite) async {
     setState(() {
       _fetching = true;
+      _error = null;
     });
 
     final https = ref.read(settingsProvider).https;
+    final addresses = favorite.allAddresses;
+
+    if (addresses.isEmpty) {
+      setState(() {
+        _fetching = false;
+        _error = 'No address configured for this favorite.';
+      });
+      return;
+    }
 
     try {
       final payload = ref.read(deviceFullInfoProvider).toRegisterDto();
-      final response = await ref
-          .read(httpProvider)
-          .v2
-          .register(
-        protocol: https ? ProtocolType.https : ProtocolType.http,
-        ip: favorite.ip,
+      final protocol = https ? ProtocolType.https : ProtocolType.http;
+      final v2 = ref.read(httpProvider).v2;
+
+      final (address, body) = await _probeFirstReachable(
+        v2: v2,
+        protocol: protocol,
+        addresses: addresses,
         port: favorite.port,
         payload: payload,
       );
 
-      final device = response.body.toDevice(favorite.ip, favorite.port, https, HttpDiscovery(ip: favorite.ip));
+      final device = body.toDevice(address, favorite.port, https, HttpDiscovery(ip: address));
+
+      // Learn: promote the reached address to primary, sync alias from the
+      // device unless the user explicitly set a custom one.
+      var updated = favorite.withReachedAddress(address);
+      if (!favorite.customAlias && body.alias.isNotEmpty) {
+        updated = updated.copyWith(alias: body.alias);
+      }
+      if (updated != favorite) {
+        await ref.redux(favoritesProvider).dispatchAsync(UpdateFavoriteAction(updated));
+      }
 
       if (mounted) {
         context.pop(device);
@@ -57,6 +85,45 @@ class _FavoritesDialogState extends State<FavoritesDialog> with Refena {
         _error = e.toString();
       });
     }
+  }
+
+  /// Registers against every [addresses] entry concurrently and resolves with
+  /// the first reachable one. Rejects only if every address fails.
+  Future<(String, dynamic)> _probeFirstReachable({
+    required dynamic v2,
+    required ProtocolType protocol,
+    required List<String> addresses,
+    required int port,
+    required dynamic payload,
+  }) async {
+    final completer = Completer<(String, dynamic)>();
+    var remaining = addresses.length;
+    Object? lastError;
+
+    for (final address in addresses) {
+      unawaited(() async {
+        try {
+          final response = await v2.register(
+            protocol: protocol,
+            ip: address,
+            port: port,
+            payload: payload,
+          );
+          if (!completer.isCompleted) {
+            completer.complete((address, response.body));
+          }
+        } catch (e) {
+          lastError = e;
+        } finally {
+          remaining--;
+          if (remaining == 0 && !completer.isCompleted) {
+            completer.completeError(lastError ?? Exception('Device unreachable'));
+          }
+        }
+      }());
+    }
+
+    return completer.future;
   }
 
   Future<void> _showDeviceDialog([FavoriteDevice? favorite]) async {
@@ -90,7 +157,8 @@ class _FavoritesDialogState extends State<FavoritesDialog> with Refena {
                     onPressed: _fetching ? null : () async => await _checkConnectionToDevice(favorite),
                     child: Align(
                       alignment: Alignment.centerLeft,
-                      child: Text('${favorite.alias}\n(${favorite.ip})'),
+                      child: Text(
+                          '${favorite.alias}\n(${favorite.ip}${favorite.allAddresses.length > 1 ? ' +${favorite.allAddresses.length - 1}' : ''})'),
                     ),
                   ),
                 ),

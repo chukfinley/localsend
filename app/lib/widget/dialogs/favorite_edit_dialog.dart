@@ -32,6 +32,7 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
   final _ipController = TextEditingController();
   final _portController = TextEditingController();
   final _aliasController = TextEditingController();
+  final _addressesController = TextEditingController();
   bool _fetching = false;
   String? _error;
 
@@ -42,10 +43,27 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
     _ipController.text = widget.prefilledDevice?.ip ?? widget.favorite?.ip ?? '';
     _aliasController.text = widget.prefilledDevice?.alias ?? widget.favorite?.alias ?? '';
 
+    // Extra addresses (Tailscale MagicDNS name, other IPs) shown one per line,
+    // excluding the primary address which already lives in the IP field.
+    final favorite = widget.favorite;
+    if (favorite != null) {
+      final extra = favorite.allAddresses.where((a) => a != favorite.ip).toList();
+      _addressesController.text = extra.join('\n');
+    }
+
     ensureRef((ref) {
       _portController.text =
           widget.prefilledDevice?.port.toString() ?? widget.favorite?.port.toString() ?? ref.read(settingsProvider).port.toString();
     });
+  }
+
+  /// Splits the extra-addresses field by newline/comma into a clean list.
+  List<String> _parseExtraAddresses() {
+    return _addressesController.text
+        .split(RegExp(r'[\n,]'))
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty && e != _ipController.text.trim())
+        .toList();
   }
 
   @override
@@ -53,6 +71,7 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
     _ipController.dispose();
     _portController.dispose();
     _aliasController.dispose();
+    _addressesController.dispose();
     super.dispose();
   }
 
@@ -90,6 +109,18 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
               controller: _portController,
               enabled: !_fetching,
               keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 16),
+            const Text('Additional addresses'),
+            const SizedBox(height: 5),
+            TextFormField(
+              controller: _addressesController,
+              enabled: !_fetching,
+              minLines: 1,
+              maxLines: 4,
+              decoration: const InputDecoration(
+                hintText: 'Tailscale name / extra IPs\n(one per line, optional)',
+              ),
             ),
             if (widget.favorite != null) ...[
               const SizedBox(height: 16),
@@ -175,6 +206,7 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
                               port: int.parse(_portController.text),
                               alias: trimmedNewAlias,
                               customAlias: existingFavorite.customAlias || trimmedNewAlias != existingFavorite.alias,
+                              addresses: _parseExtraAddresses(),
                             ),
                           ),
                         );
@@ -210,6 +242,7 @@ class _FavoriteEditDialogState extends State<FavoriteEditDialog> with Refena {
                                 ip: _ipController.text,
                                 port: int.parse(_portController.text),
                                 alias: name.isEmpty ? response.body.alias : name,
+                                addresses: _parseExtraAddresses(),
                               ),
                             ),
                           );
