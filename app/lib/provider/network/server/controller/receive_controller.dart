@@ -29,6 +29,7 @@ import 'package:localsend_app/provider/favorites_provider.dart';
 import 'package:localsend_app/provider/http_provider.dart';
 import 'package:localsend_app/provider/logging/discovery_logs_provider.dart';
 import 'package:localsend_app/provider/network/nearby_devices_provider.dart';
+import 'package:localsend_app/provider/network/scan_facade.dart';
 import 'package:localsend_app/provider/network/send_provider.dart';
 import 'package:localsend_app/provider/network/server/controller/common.dart';
 import 'package:localsend_app/provider/network/server/server_provider.dart';
@@ -198,22 +199,15 @@ class ReceiveController {
             port: settings.port,
             https: settings.https,
           );
-      if (remote.onlinePeers.isNotEmpty) {
-        _logger.info('Learned ${remote.onlinePeers.length} tailnet peers from $peerIp');
-        await server.ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
-              nodes: remote.onlinePeers,
-              port: settings.port,
-              https: settings.https,
-            ));
-      } else {
-        // The probing peer itself runs LocalSend — probe it directly so it
-        // shows up even if its map was empty.
-        await server.ref.redux(nearbyDevicesProvider).dispatchAsync(StartTailscaleScan(
-              nodes: [TailscaleNode(ip: peerIp, dnsName: '', hostName: peerIp, online: true)],
-              port: settings.port,
-              https: settings.https,
-            ));
-      }
+      final nodes = remote.onlinePeers.isNotEmpty
+          ? remote.onlinePeers
+          : [TailscaleNode(ip: peerIp, dnsName: '', hostName: peerIp, online: true)];
+      _logger.info('Reciprocal: registering with ${nodes.length} tailnet peer(s) learned from $peerIp');
+      await server.ref.global.dispatchAsync(RegisterWithTailscalePeers(
+        nodes: nodes,
+        port: settings.port,
+        https: settings.https,
+      ));
     }());
   }
 
